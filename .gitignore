@@ -1,0 +1,21 @@
+#virtual environment
+env/
+venv/
+
+local_settings.py
+/static/
+/media/
+
+*.sqlite3
+*.sqlite3-journal
+*.pyc
+*.log
+
+logs/
+__pycache__/
+
+#vscode
+.history/
+.vscode/
+
+.idea/
