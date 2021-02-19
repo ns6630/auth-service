@@ -23,9 +23,10 @@ def create_user(db: Session, user: schemas.UserCreate):
 
 def update_user(db:Session, user: schemas.UserUpdate):
     hashed_password = user.password + "fake_salt"
-    db.query(models.User).filter(models.User.id == user.id).update(**user.dict())
+    db.query(models.User).filter(models.User.id == user.id).update(**user.dict(), password=hashed_password)
+    db.commit()
+    return db.query(models.User).filter(models.User.id == user.id).first()
     
-
 def create_registration_code(db: Session, code: schemas.RegistrationCodeBase, user_id: int):
     db_registration_code = models.RegistrationCode(
         **code.dict(),

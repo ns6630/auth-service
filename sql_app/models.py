@@ -24,7 +24,7 @@ class RegistrationCode(Base):
     __table__ = "registration_code"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("user.id"), unique=True)
+    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), unique=True)
     code = Column(String)
 
     user = relationship("User", back_populates="registration_code")
