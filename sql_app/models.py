@@ -13,11 +13,20 @@ class User(Base):
     full_name = Column(String)
     email = Column(String, unique=True, index=True)
     password = Column(String)
-    refresh_token = Column(String)
     confirmed = Column(Boolean, default=False)
     registration_date = Column(DateTime, default=datetime.now)
 
     registration_code = relationship("RegistrationCode", uselist=False, back_populates="user")
+    refresh_tokens = relationship("RegistrationCode", back_populates="user")
+
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_token"
+
+    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
+    token = Column(String)
+
+    user = relationship("User", back_populates="refresh_token")
 
 
 class RegistrationCode(Base):
