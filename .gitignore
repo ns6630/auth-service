@@ -1,6 +1,7 @@
 #virtual environment
 env/
 venv/
+.env
 
 local_settings.py
 /static/
@@ -10,9 +11,11 @@ local_settings.py
 *.sqlite3-journal
 *.pyc
 *.log
+*.db
 
 logs/
 __pycache__/
+.pytest_cache/
 
 #vscode
 .history/
