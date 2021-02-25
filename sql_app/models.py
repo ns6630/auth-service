@@ -23,8 +23,9 @@ class User(Base):
 class RefreshToken(Base):
     __tablename__ = "refresh_token"
 
+    id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
-    token = Column(String)
+    token = Column(String, index=True)
 
     user = relationship("User", back_populates="refresh_token")
 
