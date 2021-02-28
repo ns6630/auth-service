@@ -17,7 +17,7 @@ class User(Base):
     registration_date = Column(DateTime, default=datetime.now)
 
     registration_code = relationship("RegistrationCode", uselist=False, back_populates="user")
-    refresh_tokens = relationship("RegistrationCode", back_populates="user")
+    refresh_tokens = relationship("RefreshToken", back_populates="user")
 
 
 class RefreshToken(Base):
@@ -27,11 +27,11 @@ class RefreshToken(Base):
     user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
     token = Column(String, index=True)
 
-    user = relationship("User", back_populates="refresh_token")
+    user = relationship("User", back_populates="refresh_tokens")
 
 
 class RegistrationCode(Base):
-    __table__ = "registration_code"
+    __tablename__ = "registration_code"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), unique=True)
