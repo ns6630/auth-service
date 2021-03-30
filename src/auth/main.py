@@ -1,3 +1,4 @@
+import jwt
 from pydantic.networks import EmailStr
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
@@ -6,6 +7,7 @@ from auth.utils.system import sqlalchemy_object_as_dict, create_registration_cod
 from auth.utils.jwt_utils import get_jwt_tokens_for_user
 from auth.exceptions import UserAlreadyExists
 from . import schemas, crud
+from .configuration import JWT_PUBLIC_KEY
 from .database import SessionLocal
 import json
 
@@ -59,13 +61,20 @@ def sign_in(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db_user.password != hash_password(user.password):
         raise HTTPException(status_code=400, detail="Неверный пароль")
 
-    response_user = schemas.UserOut(**sqlalchemy_object_as_dict(db_user))
-    response = get_jwt_tokens_for_user(response_user)
+    return get_jwt_tokens(db, db_user)
 
-    refresh_token_schema = schemas.RefreshTokenBase(
-        token=response["refresh_token"], user_id=db_user.id)
-    crud.create_refresh_token(db, refresh_token=refresh_token_schema)
-    return json.dumps(response)
+
+@app.post("/refresh-tokens")
+def refresh_tokens(refresh_token: str, db: Session = Depends(get_db)):
+    try:
+        refresh_token_decoded = jwt.decode(jwt=refresh_token, key=JWT_PUBLIC_KEY, algorithms=["RS256"])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Срок действия токена истек")
+    db_user = crud.get_user(db, user_id=refresh_token_decoded["id"])
+    is_valid_user_exist(db_user)
+    crud.delete_refresh_token(db, token=refresh_token)
+    response = get_jwt_tokens(db, db_user)
+    return response
 
 
 @app.post("/sign-out")
@@ -98,3 +107,12 @@ def is_valid_user_exist(db_user):
     if not db_user.confirmed:
         raise HTTPException(
             status_code=403, detail="Пользователь не завершил регистрацию")
+
+
+def get_jwt_tokens(db, db_user):
+    response_user = schemas.UserOut(**sqlalchemy_object_as_dict(db_user))
+    response = get_jwt_tokens_for_user(response_user)
+    refresh_token_schema = schemas.RefreshTokenBase(
+        token=response["refresh_token"], user_id=db_user.id)
+    crud.create_refresh_token(db, refresh_token=refresh_token_schema)
+    return json.dumps(response)

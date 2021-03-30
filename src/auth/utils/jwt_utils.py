@@ -14,7 +14,7 @@ def get_jwt_tokens_for_user(user: schemas.UserOut):
     access_token = jwt.encode(payload=access_token_dict, key=JWT_PRIVATE_KEY, algorithm="RS256")
 
     refresh_token_dict = {
-        **user.dict(),
+        "id": user.id,
         "exp": datetime_now + datetime.timedelta(days=REFRESH_TOKEN_EXP)
     }
     refresh_token = jwt.encode(payload=refresh_token_dict, key=JWT_PRIVATE_KEY, algorithm="RS256")
