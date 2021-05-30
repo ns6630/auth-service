@@ -58,6 +58,15 @@ class RefreshToken(RefreshTokenBase):
         orm_mode = True
 
 
+class SignInResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+
+
+class ChangePasswordResponse(BaseModel):
+    message: str
+
+
 class RegistrationCodeBase(BaseModel):
     code: str
     user_id: int
