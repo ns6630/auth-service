@@ -1,9 +1,9 @@
 import jwt
 from pydantic.networks import EmailStr
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Response
 from sqlalchemy.orm import Session
 from auth.utils.email import send_registration_code
-from auth.utils.system import sqlalchemy_object_as_dict, create_registration_code, hash_password
+from auth.utils.core import sqlalchemy_object_as_dict, create_registration_code, hash_password
 from auth.utils.jwt_utils import get_jwt_tokens_for_user
 from auth.exceptions import UserAlreadyExists
 from . import schemas, crud
@@ -11,17 +11,9 @@ from .configuration import JWT_PUBLIC_KEY
 from .database import SessionLocal
 import json
 
+
 app = FastAPI()
 
-
-# @app.on_event("startup")
-# async def startup():
-#     await database.connect()
-
-
-# @app.on_event("shutdown")
-# async def shutdown():
-#     await database.disconnect()
 
 def get_db():
     db = SessionLocal()
@@ -32,8 +24,8 @@ def get_db():
 
 
 @app.get("/")
-async def root():
-    return {"message": "Hello World"}
+def root():
+    return Response()
 
 
 @app.post("/sign-up", response_model=schemas.UserOut)
@@ -77,11 +69,6 @@ def refresh_tokens(refresh_token: str, db: Session = Depends(get_db)):
     return response
 
 
-@app.post("/sign-out")
-def sign_out(access_token: str):
-    pass
-
-
 @app.post("/change-password", response_model=schemas.ChangePasswordResponse)
 def change_password(user_id: int, old_password: str, new_password: str, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
@@ -91,14 +78,6 @@ def change_password(user_id: int, old_password: str, new_password: str, db: Sess
     crud.update_user_password(db, user_id=user_id, new_password=hash_password(new_password))
     crud.delete_refresh_tokens_by_user_id(db, user_id=user_id)
     return json.dumps({"message": "Пароль был обновлен"})
-
-
-async def send_email_code(email: EmailStr):
-    pass
-
-
-async def confirm_email():
-    pass
 
 
 def raise_if_user_not_valid(db_user):

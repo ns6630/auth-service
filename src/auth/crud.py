@@ -1,4 +1,4 @@
-from auth.utils.system import hash_password
+from auth.utils.core import hash_password
 from sqlalchemy.orm import Session
 from auth import schemas, models
 from sqlalchemy.exc import IntegrityError

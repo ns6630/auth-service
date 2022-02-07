@@ -11,7 +11,7 @@ from auth.crud import confirm_user
 from auth.main import sign_in, sign_up, refresh_tokens, change_password
 
 
-def test_sign_in_user_not_found(db):
+def test_sign_in_returns_user_not_found(db):
     user = schemas.UserCreate(
         email="test@test.test",
         password="testpassword"
